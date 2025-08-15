@@ -88,20 +88,17 @@
 
 
 <script>
+    // --- PHẦN LẤY DỮ LIỆU TỪ URL ---
     const params = new URLSearchParams(window.location.search);
     const tenKhachHang = params.get('ten') || "KhongCoTen";
-    // Lấy chuỗi JSON từ URL. Nếu không có thì gán mảng rỗng '[]'
     const chuoiGiaoDich = params.get('giao_dich') || '[]';
 
-    // --- PHẦN LOGIC HIỂN THỊ DỮ LIỆU (ĐƯỢC NÂNG CẤP) ---
-
-    // 1. Chuyển đổi chuỗi JSON thành một mảng JavaScript thực sự
+    // --- PHẦN HIỂN THỊ DỮ LIỆU LÊN BẢNG ---
     let transactions = [];
     try {
         transactions = JSON.parse(chuoiGiaoDich);
     } catch (e) {
         console.error("Lỗi parse JSON:", e);
-        // Nếu có lỗi, transactions vẫn là mảng rỗng
     }
     
     function formatNumber(num) {
@@ -115,9 +112,7 @@
     const tableBody = document.querySelector("#transaction-table tbody");
     let totalNap = 0, totalRut = 0, totalLoiNhuan = 0;
 
-    // 2. Lặp qua mảng transactions (đơn giản và rõ ràng hơn)
     transactions.forEach((tx, index) => {
-        // 3. Truy cập dữ liệu trực tiếp qua tên thuộc tính (tx.ngay, tx.tienNap, ...)
         const tienNap = parseFloat(tx.tienNap) || 0;
         const tienRut = parseFloat(tx.tienRut) || 0;
         const loiNhuan = parseFloat(tx.loiNhuan) || 0;
@@ -140,14 +135,60 @@
     document.getElementById('total-rut').textContent = formatNumber(totalRut);
     document.getElementById('total-loinhuan').textContent = formatNumber(totalLoiNhuan);
 
-    // --- PHẦN LOGIC CHO CÁC NÚT BẤM (GIỮ NGUYÊN) ---
+    // --- PHẦN LOGIC GÁN CHỨC NĂNG CHO CÁC NÚT BẤM (QUAN TRỌNG) ---
     const contentToCapture = document.getElementById('bill-content');
     const downloadBtn = document.getElementById('btn-download');
     const copyBtn = document.getElementById('btn-copy');
     const shareBtn = document.getElementById('btn-share');
-    downloadBtn.addEventListener('click', () => { /* ... giữ nguyên code ... */ });
-    copyBtn.addEventListener('click', () => { /* ... giữ nguyên code ... */ });
-    shareBtn.addEventListener('click', async () => { /* ... giữ nguyên code ... */ });
+
+    // 1. Chức năng TẢI XUỐNG
+    downloadBtn.addEventListener('click', () => {
+        html2canvas(contentToCapture).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `PhieuThongTin_${tenKhachHang}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    });
+
+    // 2. Chức năng COPY ẢNH
+    copyBtn.addEventListener('click', () => {
+        html2canvas(contentToCapture).then(canvas => {
+            canvas.toBlob(blob => {
+                navigator.clipboard.write([new ClipboardItem({'image/png': blob})])
+                .then(() => {
+                    copyBtn.textContent = '✅ Đã copy!';
+                    setTimeout(() => { copyBtn.textContent = '📋 Copy Ảnh'; }, 2000);
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Lỗi: Không thể copy ảnh. Trình duyệt của bạn có thể không hỗ trợ hoặc không được cấp quyền.');
+                });
+            });
+        });
+    });
+
+    // 3. Chức năng GỬI/SHARE
+    shareBtn.addEventListener('click', async () => {
+        try {
+            const canvas = await html2canvas(contentToCapture);
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            const file = new File([blob], `PhieuThongTin_${tenKhachHang}.png`, { type: 'image/png' });
+            const shareData = {
+                files: [file],
+                title: `Phiếu thông tin cho ${tenKhachHang}`,
+                text: `Đây là phiếu thông tin giao dịch của ${tenKhachHang}.`,
+            };
+            if (navigator.canShare && navigator.canShare(shareData)) {
+                await navigator.share(shareData);
+            } else {
+                alert('Trình duyệt của bạn không hỗ trợ chức năng chia sẻ file này.');
+            }
+        } catch (err) {
+            console.error('Lỗi share:', err);
+            alert('Đã có lỗi xảy ra khi chia sẻ.');
+        }
+    });
 </script>
 
 </body>
