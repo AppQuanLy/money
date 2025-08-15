@@ -143,7 +143,7 @@
 
     // 1. Chức năng TẢI XUỐNG
     downloadBtn.addEventListener('click', () => {
-        html2canvas(contentToCapture).then(canvas => {
+        html2canvas(contentToCapture, { backgroundColor: '#FFFFFF' }).then(canvas => {
             const link = document.createElement('a');
             link.download = `PhieuThongTin_${tenKhachHang}.png`;
             link.href = canvas.toDataURL('image/png');
@@ -153,7 +153,7 @@
 
     // 2. Chức năng COPY ẢNH
     copyBtn.addEventListener('click', () => {
-        html2canvas(contentToCapture).then(canvas => {
+        html2canvas(contentToCapture, { backgroundColor: '#FFFFFF' }).then(canvas => {
             canvas.toBlob(blob => {
                 navigator.clipboard.write([new ClipboardItem({'image/png': blob})])
                 .then(() => {
@@ -171,7 +171,7 @@
     // 3. Chức năng GỬI/SHARE
     shareBtn.addEventListener('click', async () => {
         try {
-            const canvas = await html2canvas(contentToCapture);
+            const canvas = await html2canvas(contentToCapture, { backgroundColor: '#FFFFFF' });
             const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
             const file = new File([blob], `PhieuThongTin_${tenKhachHang}.png`, { type: 'image/png' });
             const shareData = {
