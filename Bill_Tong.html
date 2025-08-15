@@ -2,10 +2,20 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Phiếu Thông Tin Giao Dịch</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .container { width: 100%; max-width: 800px; margin: auto; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }
+    .container { 
+        width: 100%; 
+        max-width: 800px; 
+        margin: auto; 
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
     h1 { text-align: center; color: #333; }
     .info { margin-bottom: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -13,11 +23,33 @@
     th { background-color: #f6b26b; font-weight: bold; }
     .total-row { background-color: #ff0000; color: white; font-weight: bold; }
     .number-cell { text-align: right; }
+    .actions {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+    .btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        margin: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+    }
+    .btn:hover { background-color: #0056b3; }
+    .btn-copy { background-color: #28a745; }
+    .btn-copy:hover { background-color: #218838; }
+    .btn-share { background-color: #ffc107; color: black; }
+    .btn-share:hover { background-color: #e0a800; }
 </style>
 </head>
 <body>
 
-<div class="container">
+<div id="bill-content" class="container">
     <h1>PHIẾU THÔNG TIN</h1>
     
     <div class="info">
@@ -48,48 +80,41 @@
     </table>
 </div>
 
-<script>
-    // Hàm để định dạng số (ví dụ: 1000000 -> 1,000,000)
-    function formatNumber(num) {
-        return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
-    }
+<div class="container actions">
+    <button id="btn-download" class="btn">📥 Tải xuống (Ảnh)</button>
+    <button id="btn-copy" class="btn btn-copy">📋 Copy Ảnh</button>
+    <button id="btn-share" class="btn btn-share">📲 Gửi Bill</button>
+</div>
 
-    // Lấy dữ liệu từ URL
+
+<script>
     const params = new URLSearchParams(window.location.search);
-    const tenKhachHang = params.get('ten');
+    const tenKhachHang = params.get('ten') || "KhongCoTen";
     const chuoiGiaoDich = params.get('giao_dich');
 
-    // Hiển thị thông tin chung
-    document.getElementById('customer-name').textContent = tenKhachHang || "Không có";
+    // --- PHẦN LOGIC HIỂN THỊ DỮ LIỆU (GIỮ NGUYÊN) ---
+    function formatNumber(num) {
+        if (isNaN(num)) return '0';
+        return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+    }
+    document.getElementById('customer-name').textContent = tenKhachHang === "KhongCoTen" ? "Không có" : tenKhachHang;
     document.getElementById('print-date').textContent = new Date().toLocaleDateString('vi-VN');
-
-    // Xử lý và hiển thị bảng giao dịch
     const tableBody = document.querySelector("#transaction-table tbody");
     let totalNap = 0, totalRut = 0, totalLoiNhuan = 0;
-
     if (chuoiGiaoDich) {
-        // Tách chuỗi dữ liệu thành các giao dịch riêng lẻ (dùng dấu ';')
         const transactions = chuoiGiaoDich.split(';');
-        
         transactions.forEach((tx, index) => {
-            // Tách mỗi giao dịch thành các phần tử (dùng dấu '|')
+            if (!tx) return;
             const parts = tx.split('|');
             if (parts.length === 4) {
                 const ngay = parts[0];
                 const tienNap = parseFloat(parts[1]) || 0;
                 const tienRut = parseFloat(parts[2]) || 0;
                 const loiNhuan = parseFloat(parts[3]) || 0;
-
-                // Cộng dồn vào tổng
-                totalNap += tienNap;
-                totalRut += tienRut;
-                totalLoiNhuan += loiNhuan;
-
-                // Tạo một hàng mới cho bảng
+                totalNap += tienNap; totalRut += tienRut; totalLoiNhuan += loiNhuan;
                 const row = tableBody.insertRow();
                 row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${ngay}</td>
+                    <td>${index + 1}</td> <td>${ngay}</td>
                     <td class="number-cell">${formatNumber(tienNap)}</td>
                     <td class="number-cell">${formatNumber(tienRut)}</td>
                     <td class="number-cell">${formatNumber(loiNhuan)}</td>
@@ -97,11 +122,61 @@
             }
         });
     }
-
-    // Cập nhật dòng tổng cộng
     document.getElementById('total-nap').textContent = formatNumber(totalNap);
     document.getElementById('total-rut').textContent = formatNumber(totalRut);
     document.getElementById('total-loinhuan').textContent = formatNumber(totalLoiNhuan);
+
+    // --- PHẦN LOGIC CHO CÁC NÚT BẤM MỚI ---
+    const contentToCapture = document.getElementById('bill-content');
+    const downloadBtn = document.getElementById('btn-download');
+    const copyBtn = document.getElementById('btn-copy');
+    const shareBtn = document.getElementById('btn-share');
+
+    // 1. Chức năng TẢI XUỐNG
+    downloadBtn.addEventListener('click', () => {
+        html2canvas(contentToCapture).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `PhieuThongTin_${tenKhachHang}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    });
+
+    // 2. Chức năng COPY ẢNH
+    copyBtn.addEventListener('click', () => {
+        html2canvas(contentToCapture).then(canvas => {
+            canvas.toBlob(blob => {
+                navigator.clipboard.write([new ClipboardItem({'image/png': blob})])
+                .then(() => {
+                    copyBtn.textContent = '✅ Đã copy!';
+                    setTimeout(() => { copyBtn.textContent = '📋 Copy Ảnh'; }, 2000);
+                })
+                .catch(err => alert('Lỗi copy: ' + err));
+            });
+        });
+    });
+
+    // 3. Chức năng GỬI/SHARE
+    shareBtn.addEventListener('click', async () => {
+        const canvas = await html2canvas(contentToCapture);
+        canvas.toBlob(async (blob) => {
+            const file = new File([blob], `PhieuThongTin_${tenKhachHang}.png`, { type: 'image/png' });
+            const shareData = {
+                files: [file],
+                title: `Phiếu thông tin cho ${tenKhachHang}`,
+                text: `Đây là phiếu thông tin giao dịch của ${tenKhachHang}.`,
+            };
+            if (navigator.canShare && navigator.canShare(shareData)) {
+                try {
+                    await navigator.share(shareData);
+                } catch (err) {
+                    console.error('Lỗi share:', err);
+                }
+            } else {
+                alert('Trình duyệt của bạn không hỗ trợ chia sẻ file.');
+            }
+        });
+    });
 </script>
 
 </body>
