@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Phiếu Thông Tin Giao Dịch</title>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .container { width: 100%; max-width: 800px; margin: auto; }
+    h1 { text-align: center; color: #333; }
+    .info { margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background-color: #f6b26b; font-weight: bold; }
+    .total-row { background-color: #ff0000; color: white; font-weight: bold; }
+    .number-cell { text-align: right; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>PHIẾU THÔNG TIN</h1>
+    
+    <div class="info">
+        <p><strong>Ngày In:</strong> <span id="print-date"></span></p>
+        <p><strong>Tên:</strong> <span id="customer-name"></span></p>
+    </div>
+
+    <table id="transaction-table">
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>NGÀY</th>
+                <th class="number-cell">TIỀN NẠP</th>
+                <th class="number-cell">TIỀN RÚT</th>
+                <th class="number-cell">LỢI NHUẬN</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="2">TỔNG</td>
+                <td class="number-cell" id="total-nap">0</td>
+                <td class="number-cell" id="total-rut">0</td>
+                <td class="number-cell" id="total-loinhuan">0</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<script>
+    // Hàm để định dạng số (ví dụ: 1000000 -> 1,000,000)
+    function formatNumber(num) {
+        return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+    }
+
+    // Lấy dữ liệu từ URL
+    const params = new URLSearchParams(window.location.search);
+    const tenKhachHang = params.get('ten');
+    const chuoiGiaoDich = params.get('giao_dich');
+
+    // Hiển thị thông tin chung
+    document.getElementById('customer-name').textContent = tenKhachHang || "Không có";
+    document.getElementById('print-date').textContent = new Date().toLocaleDateString('vi-VN');
+
+    // Xử lý và hiển thị bảng giao dịch
+    const tableBody = document.querySelector("#transaction-table tbody");
+    let totalNap = 0, totalRut = 0, totalLoiNhuan = 0;
+
+    if (chuoiGiaoDich) {
+        // Tách chuỗi dữ liệu thành các giao dịch riêng lẻ (dùng dấu ';')
+        const transactions = chuoiGiaoDich.split(';');
+        
+        transactions.forEach((tx, index) => {
+            // Tách mỗi giao dịch thành các phần tử (dùng dấu '|')
+            const parts = tx.split('|');
+            if (parts.length === 4) {
+                const ngay = parts[0];
+                const tienNap = parseFloat(parts[1]) || 0;
+                const tienRut = parseFloat(parts[2]) || 0;
+                const loiNhuan = parseFloat(parts[3]) || 0;
+
+                // Cộng dồn vào tổng
+                totalNap += tienNap;
+                totalRut += tienRut;
+                totalLoiNhuan += loiNhuan;
+
+                // Tạo một hàng mới cho bảng
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${ngay}</td>
+                    <td class="number-cell">${formatNumber(tienNap)}</td>
+                    <td class="number-cell">${formatNumber(tienRut)}</td>
+                    <td class="number-cell">${formatNumber(loiNhuan)}</td>
+                `;
+            }
+        });
+    }
+
+    // Cập nhật dòng tổng cộng
+    document.getElementById('total-nap').textContent = formatNumber(totalNap);
+    document.getElementById('total-rut').textContent = formatNumber(totalRut);
+    document.getElementById('total-loinhuan').textContent = formatNumber(totalLoiNhuan);
+</script>
+
+</body>
+</html>
