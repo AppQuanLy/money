@@ -88,55 +88,56 @@
 
 
 <script>
+    // --- PHẦN LOGIC MỚI SỬ DỤNG JSONP ---
     const params = new URLSearchParams(window.location.search);
-    const maKhachHang = params.get('makh'); // Lấy mã kh từ URL
+    const maKhachHang = params.get('makh');
     
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw7AuQNg4od3UCz5m2NKb65cbjA160OVEEmxGuOcUlFpPuPDIkITZiDqcXXPD7vGJQVlQ/exec'; // <-- THAY URL CỦA BẠN
+    // THAY THẾ BẰNG WEB APP URL BẠN ĐÃ COPY
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/xxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec';
 
-    document.getElementById('print-date').textContent = new Date().toLocaleDateString('vi-VN');
+    // Tạo một hàm tạm thời trên trang để Apps Script có thể gọi
+    function xuLyDuLieu(data) {
+        const tenKhachHang = data.tenKh;
+        const transactions = data.giaoDich;
 
-    // Gọi Apps Script với mã kh
-    fetch(`${APPS_SCRIPT_URL}?makh=${maKhachHang}`)
-        .then(response => response.json())
-        .then(data => { // data bây giờ là một đối tượng chứa cả tên và giao dịch
-            const tenKhachHang = data.tenKh;
-            const transactions = data.giaoDich;
+        document.getElementById('customer-name').textContent = tenKhachHang || "Không có";
 
-            document.getElementById('customer-name').textContent = tenKhachHang || "Không có";
+        // (Phần code hiển thị bảng và tính tổng giữ nguyên như cũ)
+        const tableBody = document.querySelector("#transaction-table tbody");
+        let totalNap = 0, totalRut = 0, totalLoiNhuan = 0;
+        transactions.forEach((tx, index) => {
+            const tienNap = parseFloat(tx.tienNap) || 0;
+            const tienRut = parseFloat(tx.tienRut) || 0;
+            const loiNhuan = parseFloat(tx.loiNhuan) || 0;
+            totalNap += tienNap;
+            totalRut += tienRut;
+            totalLoiNhuan += loiNhuan;
+            const row = tableBody.insertRow();
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${tx.ngay}</td>
+                <td class="number-cell">${formatNumber(tienNap)}</td>
+                <td class="number-cell">${formatNumber(tienRut)}</td>
+                <td class="number-cell">${formatNumber(loiNhuan)}</td>
+            `;
+        });
+        document.getElementById('total-nap').textContent = formatNumber(totalNap);
+        document.getElementById('total-rut').textContent = formatNumber(totalRut);
+        document.getElementById('total-loinhuan').textContent = formatNumber(totalLoiNhuan);
+    }
 
-            const tableBody = document.querySelector("#transaction-table tbody");
-            let totalNap = 0, totalRut = 0, totalLoiNhuan = 0;
-
-            transactions.forEach((tx, index) => {
-                const tienNap = parseFloat(tx.tienNap) || 0;
-                const tienRut = parseFloat(tx.tienRut) || 0;
-                const loiNhuan = parseFloat(tx.loiNhuan) || 0;
-                totalNap += tienNap;
-                totalRut += tienRut;
-                totalLoiNhuan += loiNhuan;
-
-                const row = tableBody.insertRow();
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${tx.ngay}</td>
-                    <td class="number-cell">${formatNumber(tienNap)}</td>
-                    <td class="number-cell">${formatNumber(tienRut)}</td>
-                    <td class="number-cell">${formatNumber(loiNhuan)}</td>
-                `;
-            });
-
-            document.getElementById('total-nap').textContent = formatNumber(totalNap);
-            document.getElementById('total-rut').textContent = formatNumber(totalRut);
-            document.getElementById('total-loinhuan').textContent = formatNumber(totalLoiNhuan);
-        })
-        .catch(error => console.error('Lỗi khi tải dữ liệu:', error));
+    // Tạo một thẻ script động để gọi Apps Script
+    const scriptTag = document.createElement('script');
+    scriptTag.src = `${APPS_SCRIPT_URL}?makh=${maKhachHang}&callback=xuLyDuLieu`;
+    document.body.appendChild(scriptTag);
 
     // --- PHẦN HIỂN THỊ DỮ LIỆU LÊN BẢNG (DÙNG SPLIT) ---
+     document.getElementById('print-date').textContent = new Date().toLocaleDateString('vi-VN');
     function formatNumber(num) {
         if (isNaN(num)) return '0';
         return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
     }
-
+    const contentToCapture = document.getElementById('bill-content');
     document.getElementById('customer-name').textContent = tenKhachHang === "KhongCoTen" ? "Không có" : tenKhachHang;
     document.getElementById('print-date').textContent = new Date().toLocaleDateString('vi-VN');
 
