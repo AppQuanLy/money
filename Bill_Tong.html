@@ -88,10 +88,48 @@
 
 
 <script>
-    // --- PHẦN LẤY DỮ LIỆU TỪ URL ---
     const params = new URLSearchParams(window.location.search);
-    const tenKhachHang = params.get('ten') || "KhongCoTen";
-    const chuoiGiaoDich = params.get('giao_dich') || '';
+    const maKhachHang = params.get('makh'); // Lấy mã kh từ URL
+    
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/xxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec'; // <-- THAY URL CỦA BẠN
+
+    document.getElementById('print-date').textContent = new Date().toLocaleDateString('vi-VN');
+
+    // Gọi Apps Script với mã kh
+    fetch(`${APPS_SCRIPT_URL}?makh=${maKhachHang}`)
+        .then(response => response.json())
+        .then(data => { // data bây giờ là một đối tượng chứa cả tên và giao dịch
+            const tenKhachHang = data.tenKh;
+            const transactions = data.giaoDich;
+
+            document.getElementById('customer-name').textContent = tenKhachHang || "Không có";
+
+            const tableBody = document.querySelector("#transaction-table tbody");
+            let totalNap = 0, totalRut = 0, totalLoiNhuan = 0;
+
+            transactions.forEach((tx, index) => {
+                const tienNap = parseFloat(tx.tienNap) || 0;
+                const tienRut = parseFloat(tx.tienRut) || 0;
+                const loiNhuan = parseFloat(tx.loiNhuan) || 0;
+                totalNap += tienNap;
+                totalRut += tienRut;
+                totalLoiNhuan += loiNhuan;
+
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${tx.ngay}</td>
+                    <td class="number-cell">${formatNumber(tienNap)}</td>
+                    <td class="number-cell">${formatNumber(tienRut)}</td>
+                    <td class="number-cell">${formatNumber(loiNhuan)}</td>
+                `;
+            });
+
+            document.getElementById('total-nap').textContent = formatNumber(totalNap);
+            document.getElementById('total-rut').textContent = formatNumber(totalRut);
+            document.getElementById('total-loinhuan').textContent = formatNumber(totalLoiNhuan);
+        })
+        .catch(error => console.error('Lỗi khi tải dữ liệu:', error));
 
     // --- PHẦN HIỂN THỊ DỮ LIỆU LÊN BẢNG (DÙNG SPLIT) ---
     function formatNumber(num) {
