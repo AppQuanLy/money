@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hợp Đồng Cầm Đồ</title>
+<style>
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        padding: 20px;
+        background: #f2f2f2;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #333;
+    }
+
+    .bill {
+        width: 794px;
+        max-width: 100%;
+        margin: 0 auto;
+        background: #fff;
+        padding: 34px 42px 30px;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 12px rgba(0,0,0,.08);
+    }
+
+    .top {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        border-bottom: 2px solid #9b1c1c;
+        padding-bottom: 15px;
+        margin-bottom: 16px;
+    }
+
+    .shop {
+        flex: 1;
+    }
+
+    .shop-name {
+        color: #9b1c1c;
+        font-size: 25px;
+        font-weight: 800;
+        text-transform: uppercase;
+        line-height: 1.15;
+    }
+
+    .shop-title {
+        color: #9b1c1c;
+        font-size: 16px;
+        font-weight: 700;
+        margin-top: 4px;
+        text-transform: uppercase;
+    }
+
+    .shop-info {
+        margin-top: 8px;
+        font-size: 13px;
+        line-height: 1.55;
+    }
+
+    .shop-info div {
+        margin: 1px 0;
+    }
+
+    .code-box {
+        width: 145px;
+        text-align: right;
+        font-size: 13px;
+    }
+
+    .code-label {
+        color: #777;
+        font-weight: 600;
+    }
+
+    .code {
+        color: #9b1c1c;
+        font-size: 18px;
+        font-weight: 800;
+        margin-top: 3px;
+        word-break: break-word;
+    }
+
+    .document-title {
+        text-align: center;
+        color: #9b1c1c;
+        font-size: 24px;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin: 8px 0 3px;
+    }
+
+    .document-subtitle {
+        text-align: center;
+        color: #666;
+        font-size: 12px;
+        margin-bottom: 18px;
+    }
+
+    .section-title {
+        color: #9b1c1c;
+        font-weight: 800;
+        font-size: 14px;
+        text-transform: uppercase;
+        margin: 15px 0 8px;
+        padding-bottom: 5px;
+        border-bottom: 1px dashed #bbb;
+    }
+
+    .row {
+        display: grid;
+        grid-template-columns: 170px 1fr;
+        min-height: 34px;
+        align-items: center;
+        border-bottom: 1px dotted #ccc;
+        font-size: 14px;
+    }
+
+    .label {
+        font-weight: 700;
+        color: #555;
+    }
+
+    .value {
+        color: #222;
+        word-break: break-word;
+    }
+
+    .money {
+        color: #9b1c1c;
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .highlight {
+        background: #fff8f8;
+        border: 1px solid #e3bcbc;
+        border-radius: 6px;
+        padding: 10px 12px;
+        margin-top: 12px;
+    }
+
+    .highlight .row {
+        border-bottom: none;
+    }
+
+    .note {
+        margin-top: 16px;
+        border: 1px solid #d7d7d7;
+        background: #fafafa;
+        border-radius: 6px;
+        padding: 12px 14px;
+        font-size: 12px;
+        line-height: 1.65;
+    }
+
+    .note-title {
+        color: #9b1c1c;
+        font-weight: 800;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+    }
+
+    .signatures {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin-top: 28px;
+        text-align: center;
+    }
+
+    .signature-title {
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .signature-space {
+        height: 72px;
+    }
+
+    .signature-name {
+        font-weight: 700;
+        font-size: 13px;
+        min-height: 18px;
+    }
+
+    .footer {
+        margin-top: 18px;
+        padding-top: 10px;
+        border-top: 1px solid #ddd;
+        text-align: center;
+        font-size: 10px;
+        color: #888;
+    }
+
+    .actions {
+        width: 794px;
+        max-width: 100%;
+        margin: 0 auto 12px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    button {
+        border: 0;
+        border-radius: 5px;
+        padding: 9px 14px;
+        background: #9b1c1c;
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    button.secondary {
+        background: #555;
+    }
+
+    @media (max-width: 600px) {
+        body { padding: 8px; }
+        .bill { padding: 22px 18px; }
+        .top { flex-direction: column; }
+        .code-box { width: auto; text-align: left; }
+        .row { grid-template-columns: 125px 1fr; font-size: 13px; }
+        .document-title { font-size: 20px; }
+        .shop-name { font-size: 21px; }
+    }
+
+    @media print {
+        body {
+            padding: 0;
+            background: white;
+        }
+
+        .bill {
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            border: 0;
+            box-shadow: none;
+        }
+
+        .actions {
+            display: none;
+        }
+
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="actions">
+    <button onclick="window.print()">In / Lưu PDF</button>
+    <button class="secondary" onclick="location.reload()">Tải lại</button>
+</div>
+
+<div class="bill">
+
+    <div class="top">
+        <div class="shop">
+            <div class="shop-name" id="shopName">DỊCH VỤ CẦM ĐỒ</div>
+            <div class="shop-title" id="shopTitle">HỢP ĐỒNG CẦM ĐỒ</div>
+
+            <div class="shop-info">
+                <div id="shopAddress"></div>
+                <div id="shopPhone"></div>
+                <div id="shopExtra"></div>
+            </div>
+        </div>
+
+        <div class="code-box">
+            <div class="code-label">Mã cầm đồ</div>
+            <div class="code" id="maCamDo">---</div>
+            <div style="margin-top:10px;font-size:12px;color:#777;">Ngày cầm</div>
+            <div id="ngayCam" style="font-weight:700;margin-top:2px;">---</div>
+        </div>
+    </div>
+
+    <div class="document-title">PHIẾU XÁC NHẬN CẦM ĐỒ</div>
+    <div class="document-subtitle">
+        Phiếu xác nhận thông tin giao dịch cầm đồ
+    </div>
+
+    <div class="section-title">1. Thông tin khách hàng</div>
+
+    <div class="row">
+        <div class="label">Họ tên khách hàng</div>
+        <div class="value" id="tenKhach">---</div>
+    </div>
+
+    <div class="row">
+        <div class="label">Số CCCD</div>
+        <div class="value" id="cccd">---</div>
+    </div>
+
+    <div class="section-title">2. Thông tin tài sản cầm</div>
+
+    <div class="row">
+        <div class="label">Món đồ cầm</div>
+        <div class="value" id="monDo">---</div>
+    </div>
+
+    <div class="row">
+        <div class="label">Số tiền cầm</div>
+        <div class="value money" id="soTienCam">---</div>
+    </div>
+
+    <div class="highlight">
+        <div class="row">
+            <div class="label">Thời hạn cầm</div>
+            <div class="value" id="thoiHan">---</div>
+        </div>
+
+        <div class="row">
+            <div class="label">Lãi / phí</div>
+            <div class="value money" id="laiPhi">---</div>
+        </div>
+    </div>
+
+    <div class="section-title">3. Thông tin thời hạn</div>
+
+    <div class="row">
+        <div class="label">Ngày cầm</div>
+        <div class="value" id="ngayCam2">---</div>
+    </div>
+
+    <div class="row" id="ngayHetHanRow">
+        <div class="label">Ngày hết hạn</div>
+        <div class="value" id="ngayHetHan">---</div>
+    </div>
+
+    <div class="note">
+        <div class="note-title">Cam kết / lưu ý</div>
+        <div id="ghiChu">
+            Khách hàng xác nhận các thông tin trên là đúng và đồng ý với các điều khoản,
+            mức lãi/phí và thời hạn cầm đã thỏa thuận với cửa hàng.
+        </div>
+    </div>
+
+    <div class="signatures">
+        <div>
+            <div class="signature-title">Người cầm</div>
+            <div class="signature-space"></div>
+            <div class="signature-name" id="chuKyKhach"></div>
+        </div>
+
+        <div>
+            <div class="signature-title">Chủ tiệm</div>
+            <div class="signature-space"></div>
+            <div class="signature-name" id="chuKyShop"></div>
+        </div>
+    </div>
+
+    <div class="footer" id="footerText">
+        Phiếu được tạo từ hệ thống quản lý cầm đồ.
+    </div>
+</div>
+
+<script>
+(function () {
+
+    // ============================================================
+    // ĐỌC JSON TỪ HASH
+    // AppSheet sẽ truyền:
+    // https://.../HoaDonCamDo.html#ENCODEURL(JSON)
+    // ============================================================
+    function getDataFromHash() {
+        const hash = window.location.hash.substring(1);
+
+        if (!hash) {
+            return {};
+        }
+
+        try {
+            return JSON.parse(decodeURIComponent(hash));
+        } catch (e) {
+            console.error("Không đọc được JSON:", e);
+            return {};
+        }
+    }
+
+    const data = getDataFromHash();
+
+    // Cho phép dùng nhiều cách đặt tên field nếu sau này bạn đổi AppSheet.
+    function val(...keys) {
+        for (const key of keys) {
+            if (data[key] !== undefined && data[key] !== null && String(data[key]).trim() !== "") {
+                return String(data[key]);
+            }
+        }
+        return "";
+    }
+
+    function setText(id, value, fallback = "---") {
+        document.getElementById(id).textContent = value || fallback;
+    }
+
+    function money(value) {
+        if (value === undefined || value === null || value === "") return "---";
+
+        // Nếu AppSheet truyền số dạng 15000000
+        const n = Number(String(value).replace(/[^\d.-]/g, ""));
+
+        if (!isNaN(n)) {
+            return new Intl.NumberFormat("vi-VN").format(n) + " đ";
+        }
+
+        return String(value);
+    }
+
+    // ------------------------------------------------------------
+    // THÔNG TIN SHOP
+    // ------------------------------------------------------------
+    setText("shopName", val("shop_name", "ten_shop"), "DỊCH VỤ CẦM ĐỒ");
+    setText("shopTitle", val("shop_title", "tieu_de_shop"), "HỢP ĐỒNG CẦM ĐỒ");
+
+    const address = val("shop_address", "dia_chi");
+    const phone = val("shop_phone", "so_dien_thoai", "dien_thoai");
+    const extra = val("shop_extra", "shop_slogan", "thong_tin_shop");
+
+    setText("shopAddress", address, "");
+    setText("shopPhone", phone ? "ĐT: " + phone : "", "");
+    setText("shopExtra", extra, "");
+
+    // ------------------------------------------------------------
+    // THÔNG TIN GIAO DỊCH
+    // ------------------------------------------------------------
+    setText("maCamDo", val("ma_cam_do", "ma"));
+    setText("ngayCam", val("ngay_cam", "ngay"));
+    setText("ngayCam2", val("ngay_cam", "ngay"));
+
+    setText("tenKhach", val("ten_khach", "ho_ten", "khach_hang"));
+    setText("cccd", val("cccd", "so_cccd"));
+
+    setText("monDo", val("mon_do", "tai_san", "ten_mon_do"));
+    setText("soTienCam", money(val("so_tien_cam", "tien_cam")));
+
+    setText("thoiHan", val("thoi_han", "thoi_gian_cam"), "---");
+
+    // ------------------------------------------------------------
+    // LÃI / PHÍ
+    //
+    // lai_type:
+    //   PERCENT = tính theo %
+    //   AMOUNT  = tính theo số tiền
+    //
+    // lai_value:
+    //   Ví dụ 3       -> 3%
+    //   Ví dụ 300000  -> 300.000 đ
+    // ------------------------------------------------------------
+    const laiType = val("lai_type", "loai_lai").toUpperCase();
+    const laiValue = val("lai_value", "gia_tri_lai", "lai");
+
+    let laiText = "---";
+
+    if (laiValue) {
+        if (laiType === "PERCENT" || laiType === "%" || laiType === "PHAN_TRAM") {
+            laiText = laiValue + "%";
+        } else if (laiType === "AMOUNT" || laiType === "TIEN" || laiType === "SO_TIEN") {
+            laiText = money(laiValue);
+        } else {
+            // Nếu không truyền loại, hiển thị nguyên giá trị
+            laiText = laiValue;
+        }
+    }
+
+    setText("laiPhi", laiText);
+
+    // ------------------------------------------------------------
+    // NGÀY HẾT HẠN
+    // Có thể truyền trực tiếp ngay_het_han từ AppSheet.
+    // Nếu không truyền, code thử tự tính khi thoi_han là số ngày.
+    // ------------------------------------------------------------
+    let ngayHetHan = val("ngay_het_han", "han_cuoi");
+
+    if (!ngayHetHan) {
+        const ngayCamRaw = val("ngay_cam");
+        const soNgay = parseInt(val("thoi_han"), 10);
+
+        if (ngayCamRaw && !isNaN(soNgay)) {
+            const d = new Date(ngayCamRaw);
+
+            if (!isNaN(d.getTime())) {
+                d.setDate(d.getDate() + soNgay);
+
+                ngayHetHan =
+                    String(d.getDate()).padStart(2, "0") + "/" +
+                    String(d.getMonth() + 1).padStart(2, "0") + "/" +
+                    d.getFullYear();
+            }
+        }
+    }
+
+    setText("ngayHetHan", ngayHetHan);
+
+    // ------------------------------------------------------------
+    // GHI CHÚ / CHỮ KÝ
+    // ------------------------------------------------------------
+    const ghiChu = val("ghi_chu", "cam_ket");
+
+    if (ghiChu) {
+        setText("ghiChu", ghiChu);
+    }
+
+    setText("chuKyKhach", val("ten_khach", "ho_ten"), "");
+    setText("chuKyShop", val("chu_tiem", "ten_chu_tiem", "shop_owner"), "");
+
+    const footer = val("footer", "chan_trang");
+
+    if (footer) {
+        setText("footerText", footer);
+    }
+
+})();
+</script>
+
+</body>
+</html>
