@@ -11,7 +11,7 @@
         margin: 0;
         padding: 20px;
         background: #f2f2f2;
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: "Segoe UI", Tahoma, Arial, sans-serif;
         color: #333;
     }
 
@@ -262,6 +262,7 @@
 </div>
 
 <div class="bill">
+    <div id="dataError" style="display:none;margin-bottom:12px;padding:10px 12px;border:1px solid #c00;border-radius:5px;background:#fff2f2;color:#b00000;font-size:12px;font-weight:700;"></div>
 
     <div class="top">
         <div class="shop">
@@ -372,16 +373,26 @@
     // https://.../HoaDonCamDo.html#ENCODEURL(JSON)
     // ============================================================
     function getDataFromHash() {
-        const hash = window.location.hash.substring(1);
+        let hash = window.location.hash.substring(1);
 
         if (!hash) {
             return {};
         }
 
         try {
-            return JSON.parse(decodeURIComponent(hash));
+            hash = decodeURIComponent(hash);
+            return JSON.parse(hash);
         } catch (e) {
-            console.error("Không đọc được JSON:", e);
+            console.error("Không đọc được JSON từ #:", e);
+            console.error("Hash nhận được:", window.location.hash);
+
+            const err = document.getElementById("dataError");
+            if (err) {
+                err.style.display = "block";
+                err.textContent =
+                    "LỖI DỮ LIỆU: JSON truyền từ AppSheet không hợp lệ. " +
+                    "Hãy kiểm tra công thức CONCATENATE() trong Action.";
+            }
             return {};
         }
     }
